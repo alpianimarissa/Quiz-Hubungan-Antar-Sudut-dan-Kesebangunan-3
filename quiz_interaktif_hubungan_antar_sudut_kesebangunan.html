@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Interaktif: Hubungan Antar Sudut & Kesebangunan</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Inter & Fira Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="h-full text-slate-800 flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header Utama -->
+    <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center font-extrabold text-xl shadow-inner">
+                    📐
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold leading-tight">Quiz Matematika Interaktif</h1>
+                    <p class="text-xs text-indigo-300 font-medium">Hubungan Antar Sudut & Kesebangunan (30 Soal)</p>
+                </div>
+            </div>
+
+            <!-- Progress & Actions -->
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:flex flex-col items-end">
+                    <span class="text-xs text-slate-400 font-medium">Kemajuan Terjawab</span>
+                    <span id="header-progress-text" class="text-sm font-bold text-indigo-400">0 / 30 Soal</span>
+                </div>
+                <button onclick="confirmResetQuiz()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-2 rounded-lg border border-slate-700 transition flex items-center gap-1.5" title="Reset Ulang Semua Jawaban">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span>Reset</span>
+                </button>
+            </div>
+        </div>
+        <!-- Global Progress Bar Line -->
+        <div class="w-full bg-slate-800 h-1.5 overflow-hidden">
+            <div id="top-progress-bar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full transition-all duration-300 w-0"></div>
+        </div>
+    </header>
+
+    <!-- Content Body -->
+    <div class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Sidebar Navigation Drawer / Grid (Desktop 4 cols, Mobile toggleable) -->
+        <aside class="lg:col-span-4 bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 sm:p-5 sticky top-20">
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                <h2 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <span>🧩 Navigasi Soal</span>
+                </h2>
+                <span id="answered-badge" class="text-[11px] font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full border border-indigo-100">
+                    0 Terjawab
+                </span>
+            </div>
+
+            <!-- Stats Mini Summary -->
+            <div class="grid grid-cols-3 gap-2 mb-4 text-center text-xs">
+                <div class="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                    <div class="text-slate-400 font-medium text-[10px]">Belum</div>
+                    <div id="stat-unanswered" class="font-bold text-slate-700 text-sm">30</div>
+                </div>
+                <div class="p-2 rounded-xl bg-emerald-50 border border-emerald-100">
+                    <div class="text-emerald-600 font-medium text-[10px]">Terjawab</div>
+                    <div id="stat-answered" class="font-bold text-emerald-700 text-sm">0</div>
+                </div>
+                <div class="p-2 rounded-xl bg-amber-50 border border-amber-100">
+                    <div class="text-amber-600 font-medium text-[10px]">Ragu-ragu</div>
+                    <div id="stat-flagged" class="font-bold text-amber-700 text-sm">0</div>
+                </div>
+            </div>
+
+            <!-- Number Grid Buttons (1 to 30) -->
+            <div id="question-grid" class="grid grid-cols-5 sm:grid-cols-6 lg:grid-cols-5 gap-2 max-h-[320px] overflow-y-auto custom-scrollbar p-1">
+                <!-- Dynamically generated buttons -->
+            </div>
+
+            <!-- Legend Info -->
+            <div class="mt-4 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-[11px] text-slate-500">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded-md bg-emerald-500 inline-block"></span>
+                    <span>Sudah Terjawab</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded-md bg-amber-400 inline-block"></span>
+                    <span>Ditandai (Ragu)</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded-md bg-indigo-600 inline-block"></span>
+                    <span>Soal Aktif</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded-md bg-slate-100 border border-slate-300 inline-block"></span>
+                    <span>Belum Diisi</span>
+                </div>
+            </div>
+
+            <!-- Finish / Review Button -->
+            <button onclick="showScoreSummary()" class="mt-5 w-full py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                <span>📊 Lihat Ringkasan & Skor</span>
+            </button>
+        </aside>
+
+        <!-- Main Quiz Question Area -->
+        <main class="lg:col-span-8 space-y-5">
+            
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 sm:p-7 relative overflow-hidden">
+                
+                <!-- Category Badge & Question Header -->
+                <div class="flex items-center justify-between flex-wrap gap-2 mb-4 pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <span id="question-num-tag" class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-lg shadow-sm">
+                            Soal #1
+                        </span>
+                        <span id="question-category-tag" class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-lg border border-indigo-100">
+                            Hubungan Antar Sudut
+                        </span>
+                    </div>
+
+                    <!-- Bookmark Flag Toggle -->
+                    <button id="flag-btn" onclick="toggleFlagCurrentQuestion()" class="text-xs flex items-center gap-1.5 px-3 py-1 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition">
+                        <svg id="flag-icon" class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                        <span id="flag-text">Tandai Ragu</span>
+                    </button>
+                </div>
+
+                <!-- Question Diagram SVG Container -->
+                <div id="illustration-container" class="my-4 p-4 bg-slate-50/90 rounded-xl border border-slate-200 flex items-center justify-center min-h-[190px] sm:min-h-[230px] overflow-x-auto">
+                    <!-- SVG diagram inserted dynamically -->
+                </div>
+
+                <!-- Question Text -->
+                <div class="my-5">
+                    <p id="question-text" class="text-sm sm:text-base font-semibold text-slate-800 leading-relaxed">
+                        <!-- Question content -->
+                    </p>
+                </div>
+
+                <!-- Options List (A, B, C, D) -->
+                <div id="options-container" class="space-y-3 my-6">
+                    <!-- Options buttons rendered dynamically -->
+                </div>
+
+                <!-- Immediate Feedback Container -->
+                <div id="feedback-box" class="hidden my-5 p-4 sm:p-5 rounded-xl border text-xs sm:text-sm space-y-2 transition-all duration-200">
+                    <!-- Feedback header & step-by-step solution rendered dynamically -->
+                </div>
+
+                <!-- Navigation Control Buttons -->
+                <div class="flex items-center justify-between pt-4 border-t border-slate-100 gap-3">
+                    <button id="prev-btn" onclick="navigateQuestion(-1)" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs sm:text-sm font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        <span>Sebelumnya</span>
+                    </button>
+
+                    <button id="next-btn" onclick="navigateQuestion(1)" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5">
+                        <span>Selanjutnya</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal Score Summary & Review -->
+    <div id="score-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 text-center space-y-5 my-8">
+            <div class="w-16 h-16 rounded-full bg-indigo-50 text-indigo-600 mx-auto flex items-center justify-center text-3xl shadow-inner border border-indigo-100">
+                🏆
+            </div>
+            
+            <div>
+                <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900">Hasil Evaluasi Quiz</h3>
+                <p class="text-xs text-slate-500 mt-1">Ringkasan capaian pengerjaan soal hubungan antar sudut & kesebangunan</p>
+            </div>
+
+            <!-- Score Circular Display -->
+            <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 grid grid-cols-2 gap-4 items-center">
+                <div class="text-center border-r border-slate-200 pr-2">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Nilai Akhir</div>
+                    <div id="final-score-val" class="text-4xl font-extrabold text-indigo-600 mt-1 font-mono">0</div>
+                    <div id="final-score-label" class="text-[11px] text-slate-400 mt-0.5">dari 100 poin</div>
+                </div>
+                <div class="space-y-1.5 text-left text-xs">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Benar:</span>
+                        <span id="modal-correct-count" class="font-bold text-emerald-600">0 Soal</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Salah:</span>
+                        <span id="modal-incorrect-count" class="font-bold text-rose-600">0 Soal</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Belum Diisi:</span>
+                        <span id="modal-unanswered-count" class="font-bold text-slate-600">0 Soal</span>
+                    </div>
+                </div>
+            </div>
+
+            <p id="final-feedback-msg" class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                <!-- Evaluation message -->
+            </p>
+
+            <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                <button onclick="closeScoreModal()" class="flex-1 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition">
+                    Kembali ke Quiz
+                </button>
+                <button onclick="confirmResetQuiz()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition">
+                    Ulangi Quiz Dari Awal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Array of 30 questions with precise, ultra-clear SVG diagrams
+        const questionsData = [
+            // Q1 (A)
+            {
+                id: 1,
+                category: "Hubungan Antar Sudut",
+                question: "Dua buah sudut saling berpenyiku (komplementer). Jika besar salah satu sudut adalah 35°, berapakah besar sudut penyikunya (x)?",
+                svg: `<svg width="280" height="160" viewBox="0 0 280 160">
+                    <!-- Right angle vertex O(50, 130), A(240, 130), B(50, 20) -->
+                    <line x1="50" y1="130" x2="250" y2="130" stroke="#334155" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="50" y1="130" x2="50" y2="20" stroke="#334155" stroke-width="2.5" stroke-linecap="round"/>
+                    <!-- Ray OC at 35 degrees from horizontal -->
+                    <line x1="50" y1="130" x2="210" y2="48" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round"/>
+                    
+                    <!-- Right Angle Symbol -->
+                    <rect x="50" y="115" width="15" height="15" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="2,2"/>
+                    
+                    <!-- Arc for 35° -->
+                    <path d="M 110 130 A 60 60 0 0 0 99 99" fill="none" stroke="#10b981" stroke-width="3"/>
+                    <text x="118" y="120" font-size="12" font-weight="bold" fill="#10b981">35°</text>
+                    
+                    <!-- Arc for x° -->
+                    <path d="M 88 88 A 60 60 0 0 0 50 70" fill="none" stroke="#ef4444" stroke-width="3"/>
+                    <text x="62" y="70" font-size="12" font-weight="bold" fill="#ef4444">x° = ?</text>
+                    
+                    <!-- Labels for Vertices -->
+                    <text x="35" y="145" font-size="11" font-weight="bold" fill="#475569">O</text>
+                    <text x="250" y="145" font-size="11" font-weight="bold" fill="#475569">A</text>
+                    <text x="35" y="20" font-size="11" font-weight="bold" fill="#475569">B</text>
+                    <text x="215" y="45" font-size="11" font-weight="bold" fill="#6366f1">C</text>
+                </svg>`,
+                options: ["55°", "65°", "145°", "45°"],
+                correct: 0, // A
+                explanation: "Sudut berpenyiku memiliki jumlah total <b>90°</b>. Maka x = 90° - 35° = <b>55°</b>."
+            },
+
+            // Q2 (B)
+            {
+                id: 2,
+                category: "Hubungan Antar Sudut",
+                question: "Dua buah sudut saling berpelurus (suplementer). Jika besar sudut P adalah (2x + 10)° dan sudut Q adalah (3x + 20)°, berapakah nilai x?",
+                svg: `<svg width="280" height="150" viewBox="0 0 280 150">
+                    <!-- Straight line AOB -->
+                    <line x1="30" y1="110" x2="250" y2="110" stroke="#334155" stroke-width="2.5" stroke-linecap="round"/>
+                    <!-- Ray OC -->
+                    <line x1="140" y1="110" x2="190" y2="30" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round"/>
+                    
+                    <!-- Arc Q (3x+20)° on left -->
+                    <path d="M 90 110 A 50 50 0 0 1 163 80" fill="none" stroke="#f59e0b" stroke-width="3"/>
+                    <text x="60" y="85" font-size="11" font-weight="bold" fill="#d97706">Q = (3x + 20)°</text>
+                    
+                    <!-- Arc P (2x+10)° on right -->
+                    <path d="M 163 80 A 50 50 0 0 1 190 110" fill="none" stroke="#6366f1" stroke-width="3"/>
+                    <text x="175" y="90" font-size="11" font-weight="bold" fill="#4f46e5">P = (2x + 10)°</text>
+                    
+                    <!-- Vertices -->
+                    <text x="20" y="125" font-size="11" font-weight="bold" fill="#475569">A</text>
+                    <text x="138" y="128" font-size="11" font-weight="bold" fill="#475569">O</text>
+                    <text x="255" y="125" font-size="11" font-weight="bold" fill="#475569">B</text>
+                    <text x="195" y="25" font-size="11" font-weight="bold" fill="#6366f1">C</text>
+                </svg>`,
+                options: ["25", "30", "35", "40"],
+                correct: 1, // B
+                explanation: "Sudut berpelurus berjumlah <b>180°</b>.<br>(2x + 10) + (3x + 20) = 180<br>5x + 30 = 180 ⟹ 5x = 150 ⟹ x = <b>30</b>."
+            },
+
+            // Q3 (C)
+            {
+                id: 3,
+                category: "Hubungan Antar Sudut",
+                question: "Dua garis berpotongan di titik O. Jika besar salah satu sudut adalah 115°, berapakah besar sudut y yang bertolak belakang dengannya?",
+                svg: `<svg width="280" height="150" viewBox="0 0 280 150">
+                    <!-- Line 1 -->
+                    <line x1="30" y1="125" x2="250" y2="25" stroke="#334155" stroke-width="2.5" stroke-linecap="round"/>
+                    <!-- Line 2 -->
+                    <line x1="30" y1="25" x2="250" y2="125" stroke="#334155" stroke-width="2.5" stroke-linecap="round"/>
+                    
+                    <!-- Left Arc (115°) -->
+                    <path d="M 105 59 A 45 45 0 0 0 105 91" fill="none" stroke="#6366f1" stroke-width="3"/>
+                    <rect x="52" y="65" width="45" height="20" rx="4" fill="#e0e7ff"/>
+                    <text x="75" y="79" font-size="11" font-weight="bold" fill="#4338ca" text-anchor="middle">115°</text>
+                    
+                    <!-- Right Arc (y°) -->
+                    <path d="M 175 59 A 45 45 0 0 1 175 91" fill="none" stroke="#ef4444" stroke-width="3"/>
+                    <rect x="183" y="65" width="45" height="20" rx="4" fill="#fee2e2"/>
+                    <text x="205" y="79" font-size="11" font-weight="bold" fill="#b91c1c" text-anchor="middle">y = ?</text>
+                    
+                    <!-- Intersection Center O -->
+                    <circle cx="140" cy="75" r="3.5" fill="#334155"/>
+                    <text x="137" y="93" font-size="11" font-weight="bold" fill="#475569">O</text>
+                </svg>`,
+                options: ["65°", "75°", "115°", "180°"],
+                correct: 2, // C
+                explanation: "Sudut-sudut yang bertolak belakang nilainya <b>selalu sama besar</b>. Jadi besar y = <b>115°</b>."
+            },
+
+            // Q4 (D)
+            {
+                id: 4,
+                category: "Hubungan Antar Sudut",
+                question: "Dua garis sejajar k dan l dipotong oleh garis transversal m. Jika ∠A₁ dan ∠B₁ adalah pasangan sudut SEHADAP dan ∠A₁ = 72°, maka besar ∠B₁ adalah...",
+                svg: `<svg width="280" height="160" viewBox="0 0 280 160">
+                    <!-- Line k -->
+                    <line x1="30" y1="50" x2="250" y2="50" stroke="#334155" stroke-width="2.5"/>
+                    <text x="255" y="54" font-size="12" font-weight="bold" fill="#334155">k</text>
+                    
+                    <!-- Line l -->
+                    <line x1="30" y1="110" x2="250" y2="110" stroke="#334155" stroke-width="2.5"/>
+                    <text x="255" y="114" font-size="12" font-weight="bold" fill="#334155">l</text>
+                    
+                    <!-- Transversal m -->
+                    <line x1="70" y1="140" x2="210" y2="20" stroke="#6366f1" stroke-width="2.5"/>
+                    <text x="215" y="20" font-size="12" font-weight="bold" fill="#6366f1">m</text>
+
+                    <!-- Parallel arrows -->
+                    <path d="M 120 45 L 127 50 L 120 55" fill="none" stroke="#334155" stroke-width="2"/>
+                    <path d="M 120 105 L 127 110 L 120 115" fill="none" stroke="#334155" stroke-width="2"/>
+                    
+                    <!-- Angle A1 (Top-Right at intersection A) -->
+                    <path d="M 200 50 A 30 30 0 0 0 188 35" fill="none" stroke="#10b981" stroke-width="3"/>
+                    <text x="190" y="32" font-size="11" font-weight="bold" fill="#047857">A₁ = 72°</text>
+                    
+                    <!-- Angle B1 (Top-Right at intersection B) -->
+                    <path d="M 160 110 A 30 30 0 0 0 148 95" fill="none" stroke="#ef4444" stroke-width="3"/>
+                    <text x="150" y="92" font-size="11" font-weight="bold" fill="#b91c1c">B₁ = ?</text>
+                </svg>`,
+                options: ["108°", "90°", "82°", "72°"],
+                correct: 3, // D
+                explanation: "Pasangan sudut <b>sehadap</b> pada dua garis sejajar nilainya <b>sama besar</b>. Maka ∠B₁ = ∠A₁ = <b>72°</b>."
+            },
+
+            // Q5 (A)
+            {
+                id: 5,
+                category: "Hubungan Antar Sudut",
+                question: "Pasangan sudut DALAM BERSEBERANGAN pada dua garis sejajar yang dipotong garis transversal memiliki sifat...",
+                svg: `<svg width="280" height="150" viewBox="0 0 280 150">
+                    <line x1="30" y1="45" x2="250" y2="45" stroke="#334155" stroke-width="2"/>
+                    <line x1="30" y1="105" x2="250" y2="105" stroke="#334155" stroke-width="2"/>
+                    <line x1="70" y1="130" x2="210" y2="20" stroke="#6366f1" stroke-width="2.5"/>
+                    
+                    <!-- Angle 1: Bottom-Left at Top Intersection -->
+                    <path d="M 148 45 A 25 25 0 0 1 163 58" fill="none" stroke="#4f46e5" stroke-width="3"/>
+                    <circle cx="150" cy="58" r="10" fill="#e0e7ff" stroke="#4f46e5" stroke-width="1.5"/>
+                    <text x="150" y="61" font-size="10" font-weight="bold" fill="#4338ca" text-anchor="middle">1</text>
+                    
+                    <!-- Angle 2: Top-Right at Bottom Intersection -->
+                    <path d="M 132 105 A 25 25 0 0 1 117 92" fill="none" stroke="#4f46e5" stroke-width="3"/>
+                    <circle cx="130" cy="92" r="10" fill="#e0e7ff" stroke="#4f46e5" stroke-width="1.5"/>
+                    <text x="130" y="95" font-size="10" font-weight="bold" fill="#4338ca" text-anchor="middle">2</text>
+                    
+                    <text x="140" y="140" font-size="11" font-weight="bold" fill="#4f46e5" text-anchor="middle">Posisi: Dalam Berseberangan</text>
+                </svg>`,
+                options: ["Sama besar", "Jumlahnya 180°", "Jumlahnya 90°", "Saling berpelurus"],
+                correct: 0, // A
+                explanation: "Setiap pasangan sudut <b>dalam berseberangan</b> (atau luar berseberangan) nilainya <b>PASTI SAMA BESAR</b>."
+            },
+
+            // Q6 (B)
+            {
+                id: 6,
+                category: "Hubungan Antar Sudut",
+                question: "Dua sudut DALAM SEPIHAK terletak pada dua garis sejajar dipotong garis ketiga. Jika salah satu sudutnya 110°, maka besar sudut pasangannya (x) adalah...",
+                svg: `<svg width="280" height="150" viewBox="0 0 280 150">
+                    <line x1="30" y1="45" x2="250" y2="45" stroke="#334155" stroke-width="2"/>
+                    <line x1="30" y1="105" x2="250" y2="105" stroke="#334155" stroke-width="2"/>
+                    <line x1="80" y1="130" x2="200" y2="20" stroke="#6366f1" stroke-width="2.5"/>
+                    
+                    <!-- Top Intersection (Bottom-Right Angle = 110°) -->
+                    <path d="M 183 45 A 25 25 0 0 1 163 54" fill="none" stroke="#6366f1" stroke-width="3"/>
+                    <rect x="175" y="52" width="45" height="18" rx="4" fill="#e0e7ff"/>
+                    <text x="197" y="65" font-size="10" font-weight="bold" fill="#4338ca" text-anchor="middle">110°</text>
+                    
+                    <!-- Bottom Intersection (Top-Right Angle = x°) -->
+                    <path d="M 152 105 A 25 25 0 0 0 142 92" fill="none" stroke="#ef4444" stroke-width="3"/>
+                    <rect x="155" y="80" width="40" height="18" rx="4" fill="#fee2e2"/>
+                    <text x="175" y="93" font-size="10" font-weight="bold" fill="#b91c1c" text-anchor="middle">x = ?</text>
+                    
+                    <text x="140" y="140" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">Pasangan Dalam Sepihak</text>
+                </svg>`,
+                options: ["110°", "70°", "80°", "90°"],
+                correct: 1, // B
+                explanation: "Sudut-sudut <b>sepihak</b> (dalam/luar) jumlahnya selalu <b>180°</b>.<br>x = 180° - 110° = <b>70°</b>."
+            },
+
+            // Q7 (C)
+            {
+                id: 7,
+                category: "Hubungan Antar Sudut",
+                question: "Sudut A dan sudut B saling berpenyiku. Perbandingan besar sudut A : B = 2 : 3. Besar sudut B adalah...",
+                svg: `<svg width="260" height="150" viewBox="0 0 260 150">
+                    <line x1="50" y1="120" x2="230" y2="120" stroke="#334155" stroke-width="2.5"/>
+                    <line x1="50" y1="120" x2="50" y2="20" stroke="#334155" stroke-width="2.5"/>
+                    <!-- Ray separating A and B -->
+                    <line x1="50" y1="120" x2="180" y2="40" stroke="#6366f1" stroke-width="2.5"/>
+                    
+                    <rect x="50" y="107" width="13" height="13" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="2,2"/>
+                    
+                    <!-- Angle A (top part) -->
+                    <path d="M 88 97 A 50 50 0 0 0 50 70" fill="none" stroke="#6366f1" stroke-width="3"/>
+                    <text x="60" y="75" font-size="11" font-weight="bold" fill="#4338ca">A (2 bagian)</text>
+                    
+                    <!-- Angle B (bottom part) -->
+                    <path d="M 100 120 A 50 50 0 0 0 88 97" fill="none" stroke="#10b981" stroke-width="3"/>
+                    <text x="105" y="112" font-size="11" font-weight="bold" fill="#047857">B (3 bagian)</text>
+                </svg>`,
+                options: ["36°", "45°", "54°", "60°"],
+                correct: 2, // C
+                explanation: "Total perbandingan = 2 + 3 = 5.<br>Sudut B = (3 / 5) × 90° = <b>54°</b>."
+            },
+
+            // Q8 (A)
+            {
+                id: 8,
+                category: "Hubungan Antar Sudut",
+                question: "Besar pelurus dari suatu sudut yang besarnya 68° adalah...",
+                svg: `<svg width="260" height="140" viewBox="0 0 260 140">
+                    <line x1="30" y1="100" x2="230" y2="100" stroke="#334155" stroke-width="2.5"/>
+                    <line x1="130" y1="100" x2="190" y2="25" stroke="#334155" stroke-width="2.5"/>
+                    
+                    <!-- Arc 68° -->
+                    <path d="M 180 100 A 50 50 0 0 0 170 50" fill="none" stroke="#10b981" stroke-width="3"/>
+                    <text x="182" y="80" font-size="12" font-weight="bold" fill="#047857">68°</text>
+                    
+                    <!-- Arc Pelurus -->
+                    <path d="M 170 50 A 50 50 0 0 0 80 100" fill="none" stroke="#ef4444" stroke-width="3"/>
+                    <text x="80" y="75" font-size="11" font-weight="bold" fill="#b91c1c">Pelurus = ?</text>
+                    
+                    <text x="127" y="118" font-size="11" font-weight="bold" fill="#475569">O</text>
+                </svg>`,
+                options: ["112°", "122°", "22°", "32°"],
+                correct: 0, // A
+                explanation: "Pelurus dari sudut x adalah 180° - x.<br>Pelurus = 180° - 68° = <b>112°</b>."
+            },
+
+            // Q9 (B)
+            {
+                id: 9,
+                category: "Hubungan Antar Sudut",
+                question: "Dua sudut LUAR BERSEBERANGAN masing-masing besarnya (4x - 10)° dan (2x + 30)°. Nilai x adalah...",
+                svg: `<svg width="280" height="150" viewBox="0 0 280 150">
+                    <line x1="30" y1="50" x2="250" y2="50" stroke="#334155" stroke-width="2"/>
+                    <line x1="30" y1="100" x2="250" y2="100" stroke="#334155" stroke-width="2"/>
+                    <line x1="70" y1="130" x2="210" y2="20" stroke="#6366f1" stroke-width="2.5"/>
+                    
+                    <!-- Top-Left Exterior Angle (4x-10)° -->
+                    <path d="M 152 50 A 25 25 0 0 1 162 36" fill="none" stroke="#6366f1" stroke-width="3"/>
+                    <text x="125" y="28" font-size="10" font-weight="bold" fill="#4338ca">(4x - 10)°</text>
+                    
+                    <!-- Bottom-Right Exterior Angle (2x+30)° -->
+                    <path d="M 128 100 A 25 25 0 0 1 118 114" fill="none" stroke="#f59e0b" stroke-width="3"/>
+                    <text x="130" y="128" font-size="10" font-weight="bold" fill="#d97706">(2x + 30)°</text>
+                </svg>`,
+                options: ["15", "20", "25", "30"],
+                correct: 1, // B
+                explanation: "Luar berseberangan nilainya SAMA BESAR.<br>4x - 10 = 2x + 30<br>2x = 40 ⟹ x = <b>20</b>."
+            },
+
+            // Q10 (C)
+            {
+                id: 10,
+                category: "Hubungan Antar Sudut",
+                question: "Pada diagram berikut, garis g // h. Jika besar ∠1 = 125°, berapakah besar ∠7 yang merupakan sudut LUAR SEPIHAK dengan ∠1?",
+                svg: `<svg width="280" height="150" viewBox="0 0 280 150">
+                    <line x1="30" y1="45" x2="250" y2="45" stroke="#334155" stroke-width="2"/>
+                    <text x="255" y="49" font-size="11" font-weight="bold" fill="#334155">g</text>
+                    <line x1="30" y1="105" x2="250" y2="105" stroke="#334155" stroke-width="2"/>
+                    <text x="255" y="109" font-size="11" font-weight="bold" fill="#334155">h</text>
+                    
+                    <line x1="80" y1="130" x2="200" y2="20" stroke="#6366f1" stroke-width="2.5"/>
+                    
+                    <!-- Angle 1 (Top-Left Exterior Angle = 125°) -->
+                    <path d="M 148 45 A 25 25 0 0 1 172 29" fill="none" stroke="#6366f1" stroke-width="3"/>
+                    <text x="100" y="32" font-size="10" font-weight="bold" fill="#4338ca">∠1 = 125°</text>
+                    
+                    <!-- Angle 7 (Bottom-Left Exterior Angle = ∠7) -->
+                    <path d="M 112 105 A 25 25 0 0 0 122 119" fill="none" stroke="#ef4444" stroke-width="3"/>
+                    <text x="75" y="122" font-size="10" font-weight="bold" fill="#b91c1c">∠7 = ?</text>
+                </svg>`,
+                options: ["125°", "65°", "55°", "45°"],
+                correct: 2, // C
+                explanation: "Sudut luar sepihak jika dijumlahkan = 180°.<br>∠7 = 180° - 125° = <b>55°</b>."
+            },
+
+            // Q11 (D)
+            {
+                id: 11,
+                category: "Hubungan Antar Sudut",
+                question: "Sebuah sudut besarnya sama dengan 4 kali sudut penyikunya. Besar sudut tersebut adalah...",
+                svg: `<svg width="240" height="150" viewBox="0 0 240 150">
+                    <line x1="40" y1="120" x2="220" y2="120" stroke="#334155" stroke-width="2.5"/>
+                    <line x1="40" y1="120" x2="40" y2="20" stroke="#334155" stroke-width="2.5"/>
+                    <line x1="40" y1="120" x2="190" y2="90" stroke="#6366f1" stroke-width="2.5"/>
+                    
+                    <rect x="40" y="107" width="13" height="13" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="2,2"/>
+                    
+                    <path d="M 85 111 A 45 45 0 0 0 40 75" fill="none" stroke="#6366f1" stroke-width="3"/>
+                    <text x="50" y="70" font-size="11" font-weight="bold" fill="#4338ca">Sudut Utama (4y)</text>
+                    
+                    <path d="M 85 120 A 45 45 0 0 0 85 111" fill="none" stroke="#10b981" stroke-width="3"/>
+                    <text x="95" y="112" font-size="11" font-weight="bold" fill="#047857">Penyiku (y)</text>
+                </svg>`,
+                options: ["18°", "36°", "54°", "72°"],
+                correct: 3, // D
+                explanation: "Misal penyiku = y, maka sudut = 4y.<br>4y + y = 90° ⟹ 5y = 90° ⟹ y = 18°.<br>Besar sudut = 4 × 18° = <b>72°</b>."
+            },
+
+            // Q12 (A)
+            {
+                id: 12,
+                category: "Hubungan Antar Sudut",
+                question: "Berapa besar sudut terkecil yang dibentuk oleh kedua jarum jam pada pukul 04.00?",
+                svg: `<svg width="220" height="160" viewBox="0 0 220 160">
+                    <circle cx="110" cy="80" r="60" fill="#f8fafc" stroke="#334155" stroke-width="3"/>
+                    
+                    <!-- Clock Numbers 12 and 4 -->
+                    <text x="110" y="36" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle">12</text>
+                    <text x="155" y="112" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle">4</text>
+                    
+                    <!-- Minute Hand (12) -->
+                    <line x1="110" y1="80" x2="110" y2="38" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
+                    <!-- Hour Hand (4) -->
+                    <line x1="110" y1="80" x2="148" y2="102" stroke="#334155" stroke-width="4" stroke-linecap="round"/>
+                    
+                    <circle cx="110" cy="80" r="4" fill="#334155"/>
+                    
+                    <!-- Arc Angle -->
+                    <path d="M 110 50 A 30 30 0 0 1 129 91" fill="none" stroke="#6366f1" stroke-width="3"/>
+                    <text x="135" y="65" font-size="11" font-weight="bold" fill="#4338ca">θ = ?</text>
+                </svg>`,
+                options: ["120°", "100°", "90°", "150°"],
+                correct: 0, // A
+                explanation: "Satu putaran penuh jam = 360° (12 angka), jadi tiap 1 jam = 30°.<br>Pukul 04.00 = 4 angka × 30° = <b>120°</b>."
+            },
+
+            // Q13 (B)
+            {
+                id: 13,
+                category: "Hubungan Antar Sudut",
+                question: "Pada gambar berikut, garis AB // CD. Jika ∠ABE = 50° dan ∠CDE = 30°, berapakah besar sudut patahan ∠BED?",
+                svg: `<svg width="280" height="160" viewBox="0 0 280 160">
+                    <!-- Line AB -->
+                    <line x1="30" y1="35" x2="250" y2="35" stroke="#334155" stroke-width="2"/>
+                    <text x="35" y="28" font-size="10" font-weight="bold" fill="#334155">A</text>
+                    <text x="235" y="28" font-size="10" font-weight="bold" fill="#334155">B</text>
+                    
+                    <!-- Line CD -->
+                    <line x1="30" y1="125" x2="250" y2="125" stroke="#334155" stroke-width="2"/>
+                    <text x="35" y="140" font-size="10" font-weight="bold" fill="#334155">C</text>
+                    <text x="235" y="140" font-size="10" font-weight="bold" fill="#334155">D</text>
+                    
+                    <!-- Patahan Segment BE and DE -->
+                    <polyline points="210,35 120,80 210,125" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linejoin="round"/>
+                    
+                    <!-- Auxiliary dashed line through E -->
+                    <line x1="30" y1="80" x2="250" y2="80" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3,3"/>
+                    
+                    <!-- Angles -->
+                    <text x="175" y="48" font-size="10" font-weight="bold" fill="#047857">50°</text>
+                    <text x="175" y="120" font-size="10" font-weight="bold" fill="#047857">30°</text>
+                    
+                    <text x="100" y="84" font-size="11" font-weight="bold" fill="#b91c1c">∠BED = ?</text>
+                    <text x="108" y="80" font-size="11" font-weight="bold" fill="#6366f1">E</text>
+                </svg>`,
+                options: ["70°", "80°", "90°", "100°"],
+                correct: 1, // B
+                explanation: "Tarik garis bantu sejajar di titik E. Sudut ∠BED = 50° (dalam berseberangan) + 30° (dalam berseberangan) = <b>80°</b>."
+            },
+
+            // Q14 (C)
+            {
+                id: 14,
+                category: "Hubungan Antar Sudut",
+                question: "Jumlah seluruh sudut dalam pada sebuah segitiga selalu bernilai...",
+                svg: `<svg width="240" height="140" viewBox="0 0 240 140">
+                    <polygon points="120,20 30,120 210,120" fill="#f1f5f9" stroke="#334155" stroke-width="2.5"/>
+                    
+                    <!-- Angle A -->
+                    <path d="M 107 35 A 20 20 0 0 0 133 35" fill="none" stroke="#6366f1" stroke-width="3"/>
+                    <text x="120" y="48" font-size="10" font-weight="bold" fill="#4338ca" text-anchor="middle">∠A</text>
+                    
+                    <!-- Angle B -->
+                    <path d="M 50 120 A 20 20 0 0 0 41 108" fill="none" stroke="#10b981" stroke-width="3"/>
+                    <text x="52" y="112" font-size="10" font-weight="bold" fill="#047857">∠B</text>
+                    
+                    <!-- Angle C -->
+                    <path d="M 199 108 A 20 20 0 0 0 190 120" fill="none" stroke="#f59e0b" stroke-width="3"/>
+                    <text x="182" y="112" font-size="10" font-weight="bold" fill="#d97706">∠C</text>
+                </svg>`,
+                options: ["90°", "360°", "180°", "270°"],
+                correct: 2, // C
+                explanation: "Jumlah ketiga sudut dalam pada segitiga apapun **selalu sama dengan 180°**."
+            },
+
+            // Q15 (D)
+            {
+                id: 15,
+                category: "Hubungan Antar Sudut",
+                question: "Nilai x pada gambar sudut berpelurus berikut jika besar sudutnya adalah (3x + 15)° dan 2x° adalah...",
+                svg: `<svg width="260" height="140" viewBox="0 0 260 140">
+                    <line x1="30" y1="105" x2="230" y2="105" stroke="#334155" stroke-width="2.5"/>
+                    <line x1="120" y1="105" x2="170" y2="25" stroke="#334155" stroke-width="2.5"/>
+                    
+                    <path d="M 70 105 A 50 50 0 0 1 146 63" fill="none" stroke="#6366f1" stroke-width="3"/>
+                    <text x="55" y="75" font-size="11" font-weight="bold" fill="#4338ca">(3x + 15)°</text>
+                    
+                    <path d="M 146 63 A 50 50 0 0 1 170 105" fill="none" stroke="#f59e0b" stroke-width="3"/>
+                    <text x="155" y="80" font-size="11" font-weight="bold" fill="#d97706">2x°</text>
+                </svg>`,
+                options: ["30", "35", "38", "33"],
+                correct: 3, // D
+                explanation: "(3x + 15) + 2x = 180<br>5x + 15 = 180 ⟹ 5x = 165 ⟹ x = <b>33</b>."
+            },
+
+            // Q16 (A)
+            {
+                id: 16,
+                category: "Hubungan Antar Sudut",
+                question: "Sebuah sudut refleks memiliki besar antara...",
+                svg: `<svg width="220" height="150" viewBox="0 0 220 150">
+                    <!-- Rays OA and OB -->
+                    <line x1="70" y1="80" x2="180" y2="80" stroke="#334155" stroke-width="2.5"/>
+                    <line x1="70" y1="80" x2="130" y2="25" stroke="#334155" stroke-width="2.5"/>
+                    
+                    <!-- Outer Reflex Arc -->
+                    <path d="M 130 25 A 55 55 0 1 0 180 80" fill="none" stroke="#ef4444" stroke-width="3.5"/>
+                    
+                    <circle cx="70" cy="80" r="3.5" fill="#334155"/>
+                    <text x="55" y="85" font-size="11" font-weight="bold" fill="#475569">O</text>
+                    <text x="35" y="130" font-size="11" font-weight="bold" fill="#b91c1c">Sudut Refleks (> 180°)</text>
+                </svg>`,
+                options: ["180° dan 360°", "90° dan 180°", "0° dan 90°", "Tepat 360°"],
+                correct: 0, // A
+                explanation: "Sudut Refleks didefinisikan sebagai sudut yang besarnya **lebih dari 180° dan kurang dari 360°**."
+            },
+
+            // Q17 (B)
+            {
+                id: 17,
+                category: "Hubungan Antar Sudut",
+                question: "Penyiku dari pelurus sudut 130° adalah...",
+                svg: `<svg width="260" height="140" viewBox="0 0 260 140">
+                    <line x1="20" y1="105" x2="240" y2="105" stroke="#334155" stroke-width="2.5"/>
+                    <line x1="120" y1="105" x2="60" y2="25" stroke="#334155" stroke-width="2.5"/>
+                    
+                    <!-- Arc 130° -->
+                    <path d="M 170 105 A 50 50 0 0 0 85 58" fill="none" stroke="#6366f1" stroke-width="3"/>
+                    <text x="125" y="85" font-size="11" font-weight="bold" fill="#4338ca">130°</text>
+                    
+                    <!-- Arc Pelurus 50° -->
+                    <path d="M 85 58 A 50 50 0 0 0 70 105" fill="none" stroke="#10b981" stroke-width="3"/>
+                    <text x="40" y="85" font-size="11" font-weight="bold" fill="#047857">Pelurus = 50°</text>
+                </svg>`,
+                options: ["50°", "40°", "60°", "30°"],
+                correct: 1, // B
+                explanation: "Langkah 1: Pelurus dari 130° = 180° - 130° = 50°.<br>Langkah 2: Penyiku dari 50° = 90° - 50° = <b>40°</b>."
+            },
+
+            // Q18 (C)
+            {
+                id: 18,
+                category: "Hubungan Antar Sudut",
+                question: "Dua sudut bertolak belakang memiliki persamaan (5x - 20)° dan (3x + 10)°. Besar masing-masing sudut tersebut adalah...",
+                svg: `<svg width="260" height="150" viewBox="0 0 260 150">
+                    <line x1="30" y1="120" x2="230" y2="30" stroke="#334155" stroke-width="2.5"/>
+                    <line x1="30" y1="30" x2="230" y2="120" stroke="#334155" stroke-width="2.5"/>
+                    
+                    <!-- Top Angle (5x-20)° -->
+                    <path d="M 98 61 A 40 40 0 0 1 162 61" fill="none" stroke="#6366f1" stroke-width="3"/>
+                    <text x="130" y="48" font-size="11" font-weight="bold" fill="#4338ca" text-anchor="middle">(5x - 20)°</text>
+                    
+                    <!-- Bottom Angle (3x+10)° -->
+                    <path d="M 98 89 A 40 40 0 0 0 162 89" fill="none" stroke="#10b981" stroke-width="3"/>
+                    <text x="130" y="112" font-size="11" font-weight="bold" fill="#047857" text-anchor="middle">(3x + 10)°</text>
+                </svg>`,
+                options: ["15°", "40°", "55°", "65°"],
+                correct: 2, // C
+                explanation: "5x - 20 = 3x + 10 ⟹ 2x = 30 ⟹ x = 15.<br>Besar sudut = 3(15) + 10 = <b>55°</b>."
+            },
+
+            // Q19 (D)
+            {
+                id: 19,
+                category: "Hubungan Antar Sudut",
+                question: "Pada trapesium sama kaki ABCD dengan AB // CD, jika ∠A = 70°, maka besar ∠D yang merupakan sudut DALAM SEPIHAK dengan ∠A adalah...",
+                svg: `<svg width="260" height="140" viewBox="0 0 260 140">
+                    <polygon points="40,110 220,110 180,35 80,35" fill="#f8fafc" stroke="#334155" stroke-width="2.5"/>
+                    
+                    <!-- Arc A (70°) -->
+                    <path d="M 70 110 A 30 30 0 0 0 53 96" fill="none" stroke="#10b981" stroke-width="3"/>
+                    <text x="65" y="100" font-size="10" font-weight="bold" fill="#047857">A (70°)</text>
+                    
+                    <!-- Arc D (?) -->
+                    <path d="M 93 35 A 30 30 0 0 0 92 50" fill="none" stroke="#ef4444" stroke-width="3"/>
+                    <text x="88" y="58" font-size="10" font-weight="bold" fill="#b91c1c">D = ?</text>
+                    
+                    <text x="225" y="125" font-size="10" font-weight="bold" fill="#475569">B</text>
+                    <text x="185" y="28" font-size="10" font-weight="bold" fill="#475569">C</text>
+                </svg>`,
+                options: ["70°", "100°", "120°", "110°"],
+                correct: 3, // D
+                explanation: "Karena AB // CD, ∠A dan ∠D adalah sudut dalam sepihak.<br>∠D = 180° - 70° = <b>110°</b>."
+            },
+
+            // Q20 (D)
+            {
+                id: 20,
+                category: "Hubungan Antar Sudut",
+                question: "Sudut luar sebuah segitiga nilainya sama dengan...",
+                svg: `<svg width="260" height="140" viewBox="0 0 260 140">
+                    <polygon points="40,110 150,110 90,30" fill="none" stroke="#334155" stroke-width="2.5"/>
+                    <!-- Base line extension -->
+                    <line x1="150" y1="110" x2="230" y2="110" stroke="#334155" stroke-width="2.5" stroke-dasharray="4,3"/>
+                    
+                    <!-- Interior Angle A & B -->
+                    <path d="M 83 40 A 15 15 0 0 0 98 40" fill="none" stroke="#6366f1" stroke-width="2.5"/>
+                    <text x="90" y="52" font-size="9" font-weight="bold" fill="#4338ca" text-anchor="middle">∠A</text>
+                    
+                    <path d="M 60 110 A 20 20 0 0 0 52 97" fill="none" stroke="#6366f1" stroke-width="2.5"/>
+                    <text x="62" y="103" font-size="9" font-weight="bold" fill="#4338ca">∠B</text>
+                    
+                    <!-- Exterior Angle Arc -->
+                    <path d="M 180 110 A 30 30 0 0 0 133 87" fill="none" stroke="#ef4444" stroke-width="3"/>
+                    <text x="155" y="95" font-size="10" font-weight="bold" fill="#b91c1c">Sudut Luar</text>
+                </svg>`,
+                options: [
+                    "180° dikurangi sudut terdekat",
+                    "Jumlah dari ketiga sudut dalam segitiga",
+                    "Selisih dua sudut dalam lainnya",
+                    "Jumlah dua sudut dalam yang tidak berpelurus dengannya"
+                ],
+                correct: 3, // D
+                explanation: "Sifat Sudut Luar Segitiga: Besarnya sama dengan **jumlah dua sudut dalam segitiga yang tidak berpelurus dengannya**."
+            },
+
+            // Q21 (A)
+            {
+                id: 21,
+                category: "Hubungan Antar Sudut",
+                question: "Jika dua sudut saling berpelurus dan perbandingannya adalah 7 : 11, maka besar sudut terkecilnya adalah...",
+                svg: `<svg width="260" height="130" viewBox="0 0 260 130">
+                    <line x1="30" y1="100" x2="230" y2="100" stroke="#334155" stroke-width="2.5"/>
+                    <line x1="130" y1="100" x2="80" y2="25" stroke="#334155" stroke-width="2.5"/>
+                    
+                    <!-- Arc 7x (acute) -->
+                    <path d="M 105 62 A 50 50 0 0 0 80 100" fill="none" stroke="#6366f1" stroke-width="3"/>
+                    <text x="65" y="80" font-size="11" font-weight="bold" fill="#4338ca">7 bagian</text>
+                    
+                    <!-- Arc 11x (obtuse) -->
+                    <path d="M 180 100 A 50 50 0 0 0 105 62" fill="none" stroke="#10b981" stroke-width="3"/>
+                    <text x="135" y="75" font-size="11" font-weight="bold" fill="#047857">11 bagian</text>
+                </svg>`,
+                options: ["70°", "110°", "60°", "80°"],
+                correct: 0, // A
+                explanation: "Total perbandingan = 7 + 11 = 18.<br>Sudut terkecil = (7 / 18) × 180° = <b>70°</b>."
+            },
+
+            // Q22 (B)
+            {
+                id: 22,
+                category: "Hubungan Antar Sudut",
+                question: "Pada segitiga sama kaki ABC dengan AC = BC, jika sudut puncak ∠C = 40°, berapakah besar sudut alas ∠A?",
+                svg: `<svg width="240" height="150" viewBox="0 0 240 150">
+                    <polygon points="120,25 50,125 190,125" fill="#f8fafc" stroke="#334155" stroke-width="2.5"/>
+                    
+                    <!-- Equality Tick Marks on AC and BC -->
+                    <line x1="80" y1="72" x2="90" y2="78" stroke="#ef4444" stroke-width="2"/>
+                    <line x1="150" y1="78" x2="160" y2="72" stroke="#ef4444" stroke-width="2"/>
+                    
+                    <!-- Top Angle C = 40° -->
+                    <path d="M 109 39 A 20 20 0 0 0 131 39" fill="none" stroke="#ef4444" stroke-width="3"/>
+                    <text x="120" y="54" font-size="10" font-weight="bold" fill="#b91c1c" text-anchor="middle">C (40°)</text>
+                    
+                    <!-- Base Angle A = ? -->
+                    <path d="M 70 125 A 20 20 0 0 0 61 110" fill="none" stroke="#6366f1" stroke-width="3"/>
+                    <text x="40" y="118" font-size="10" font-weight="bold" fill="#4338ca">A = ?</text>
+                    
+                    <text x="195" y="135" font-size="10" font-weight="bold" fill="#475569">B</text>
+                </svg>`,
+                options: ["60°", "70°", "80°", "140°"],
+                correct: 1, // B
+                explanation: "Jumlah sudut segitiga = 180°.<br>Sudut alas (∠A = ∠B) = (180° - 40°) / 2 = 140° / 2 = <b>70°</b>."
+            },
+
+            // Q23 (C)
+            {
+                id: 23,
+                category: "Hubungan Antar Sudut",
+                question: "Pada jajargenjang ABCD, besar sudut yang berdekatan/sebelahan jika dijumlahkan selalu bernilai...",
+                svg: `<svg width="260" height="130" viewBox="0 0 260 130">
+                    <polygon points="60,105 210,105 170,30 20,30" fill="none" stroke="#334155" stroke-width="2.5"/>
+                    
+                    <!-- Adjacent Angles A and D -->
+                    <path d="M 40 30 A 20 20 0 0 0 32 45" fill="none" stroke="#6366f1" stroke-width="3"/>
+                    <text x="25" y="22" font-size="11" font-weight="bold" fill="#4338ca">A</text>
+                    
+                    <path d="M 75 105 A 20 20 0 0 0 52 90" fill="none" stroke="#10b981" stroke-width="3"/>
+                    <text x="50" y="120" font-size="11" font-weight="bold" fill="#047857">D</text>
+                    
+                    <text x="175" y="22" font-size="11" font-weight="bold" fill="#475569">B</text>
+                    <text x="218" y="120" font-size="11" font-weight="bold" fill="#475569">C</text>
+                </svg>`,
+                options: ["90°", "360°", "180°", "270°"],
+                correct: 2, // C
+                explanation: "Dua sudut berdekatan pada jajargenjang bersifat dalam sepihak, sehingga jumlahnya **selalu 180°**."
+            },
+
+            // Q24 (D)
+            {
+                id: 24,
+                category: "Hubungan Antar Sudut",
+                question: "Manakah pasangan sudut berikut pada dua garis sejajar dipotong transversal yang JUMLAHNYA 180°?",
+                svg: `<svg width="280" height="140" viewBox="0 0 280 140">
+                    <line x1="30" y1="45" x2="250" y2="45" stroke="#334155" stroke-width="2"/>
+                    <line x1="30" y1="95" x2="250" y2="95" stroke="#334155" stroke-width="2"/>
+                    <line x1="80" y1="120" x2="200" y2="20" stroke="#6366f1" stroke-width="2.5"/>
+                    
+                    <!-- Highlighted Dalam Sepihak -->
+                    <circle cx="172" cy="55" r="12" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+                    <circle cx="148" cy="85" r="12" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+                    
+                    <text x="140" y="132" font-size="11" font-weight="bold" fill="#b91c1c" text-anchor="middle">Pasangan SEPIHAK (Jumlah = 180°)</text>
+                </svg>`,
+                options: [
+                    "Sudut Sehadap",
+                    "Sudut Dalam Berseberangan",
+                    "Sudut Luar Berseberangan",
+                    "Sudut Dalam Sepihak"
+                ],
+                correct: 3, // D
+                explanation: "Ingat kata kunci: Pasangan berakhiran **SEPIHAK** (dalam/luar sepihak) jumlah sudutnya **SELALU 180°**."
+            },
+
+            // Q25 (B)
+            {
+                id: 25,
+                category: "Hubungan Antar Sudut",
+                question: "Jika besar ∠A = (x + 25)° dan ∠B = (3x - 15)° merupakan pasangan sudut SEHADAP, maka nilai x adalah...",
+                svg: `<svg width="280" height="140" viewBox="0 0 280 140">
+                    <line x1="30" y1="45" x2="250" y2="45" stroke="#334155" stroke-width="2"/>
+                    <line x1="30" y1="95" x2="250" y2="95" stroke="#334155" stroke-width="2"/>
+                    <line x1="80" y1="120" x2="200" y2="20" stroke="#6366f1" stroke-width="2.5"/>
+                    
+                    <!-- Angle A (Top-Right) -->
+                    <path d="M 180 45 A 20 20 0 0 0 168 35" fill="none" stroke="#6366f1" stroke-width="3"/>
+                    <text x="172" y="32" font-size="10" font-weight="bold" fill="#4338ca">∠A</text>
+                    
+                    <!-- Angle B (Top-Right) -->
+                    <path d="M 150 95 A 20 20 0 0 0 138 85" fill="none" stroke="#10b981" stroke-width="3"/>
+                    <text x="142" y="82" font-size="10" font-weight="bold" fill="#047857">∠B</text>
+                </svg>`,
+                options: ["15", "20", "25", "30"],
+                correct: 1, // B
+                explanation: "Sudut Sehadap bernilai sama besar.<br>3x - 15 = x + 25<br>2x = 40 ⟹ x = <b>20</b>."
+            },
+
+            // ==================== KESEBANGUNAN (5 SOAL: Q26 - Q30) ====================
+
+            // Q26 (C)
+            {
+                id: 26,
+                category: "Kesebangunan",
+                question: "Dua segitiga dikatakan SEBANGUN (~) jika memenuhi syarat utama berikut, yaitu...",
+                svg: `<svg width="280" height="140" viewBox="0 0 280 140">
+                    <!-- Triangle 1 (Small) -->
+                    <polygon points="20,110 80,110 50,50" fill="#e0e7ff" stroke="#4338ca" stroke-width="2"/>
+                    <text x="50" y="125" font-size="10" font-weight="bold" fill="#4338ca" text-anchor="middle">△ Kecil</text>
+
+                    <!-- Triangle 2 (Large) -->
+                    <polygon points="120,120 240,120 180,20" fill="#e0e7ff" stroke="#4338ca" stroke-width="2"/>
+                    <text x="180" y="135" font-size="10" font-weight="bold" fill="#4338ca" text-anchor="middle">△ Besar</text>
+                    
+                    <text x="100" y="70" font-size="14" font-weight="bold" fill="#6366f1">~</text>
+                </svg>`,
+                options: [
+                    "Semua sisinya harus sama panjang",
+                    "Luas kedua segitiga persis sama",
+                    "Sudut-sudut yang seletak sama besar & sisi seletak sebanding",
+                    "Keliling kedua segitiga persis sama"
+                ],
+                correct: 2, // C
+                explanation: "Syarat utama Kesebangunan: **Sudut-sudut seletak sama besar** dan **sisi-sisi seletak memiliki perbandingan yang senilai/sebanding**."
+            },
+
+            // Q27 (A)
+            {
+                id: 27,
+                category: "Kesebangunan",
+                question: "Pada gambar segitiga ABC berikut, garis DE // BC. Jika ∠A = 50° dan ∠ABC = 65°, berapakah besar sudut ∠ADE?",
+                svg: `<svg width="260" height="150" viewBox="0 0 260 150">
+                    <polygon points="130,20 40,130 220,130" fill="none" stroke="#334155" stroke-width="2.5"/>
+                    <line x1="76" y1="85" x2="184" y2="85" stroke="#6366f1" stroke-width="2.5"/>
+                    
+                    <!-- Parallel arrows -->
+                    <path d="M 125 81 L 132 85 L 125 89" fill="none" stroke="#6366f1" stroke-width="1.5"/>
+                    <path d="M 125 126 L 132 130 L 125 134" fill="none" stroke="#334155" stroke-width="1.5"/>
+                    
+                    <!-- Labels -->
+                    <text x="130" y="15" font-size="10" font-weight="bold" fill="#334155" text-anchor="middle">A (50°)</text>
+                    <text x="62" y="82" font-size="10" font-weight="bold" fill="#ef4444">D (ADE = ?)</text>
+                    <text x="190" y="82" font-size="10" font-weight="bold" fill="#334155">E</text>
+                    <text x="25" y="135" font-size="10" font-weight="bold" fill="#10b981">B (65°)</text>
+                    <text x="225" y="135" font-size="10" font-weight="bold" fill="#334155">C</text>
+                </svg>`,
+                options: ["65°", "50°", "75°", "115°"],
+                correct: 0, // A
+                explanation: "Karena DE // BC, maka **∠ADE sehadap dengan ∠ABC**. Masing-masing sudut besarnya sama yaitu **65°**."
+            },
+
+            // Q28 (B)
+            {
+                id: 28,
+                category: "Kesebangunan",
+                question: "Segitiga PQR sebangun dengan segitiga STU (△PQR ~ △STU). Jika ∠P = 40° dan ∠Q = 80°, berapakah besar sudut ∠U?",
+                svg: `<svg width="280" height="140" viewBox="0 0 280 140">
+                    <!-- △PQR -->
+                    <polygon points="20,110 90,110 40,30" fill="none" stroke="#334155" stroke-width="2"/>
+                    <text x="15" y="125" font-size="9" font-weight="bold" fill="#334155">P(40°)</text>
+                    <text x="85" y="125" font-size="9" font-weight="bold" fill="#334155">Q(80°)</text>
+                    <text x="35" y="25" font-size="9" font-weight="bold" fill="#334155">R</text>
+
+                    <!-- △STU -->
+                    <polygon points="140,120 250,120 170,20" fill="none" stroke="#6366f1" stroke-width="2"/>
+                    <text x="135" y="135" font-size="9" font-weight="bold" fill="#4338ca">S(40°)</text>
+                    <text x="245" y="135" font-size="9" font-weight="bold" fill="#4338ca">T(80°)</text>
+                    <text x="165" y="15" font-size="10" font-weight="bold" fill="#ef4444">U = ?</text>
+                </svg>`,
+                options: ["40°", "60°", "80°", "100°"],
+                correct: 1, // B
+                explanation: "Sudut ketiga pada △PQR: ∠R = 180° - (40° + 80°) = 60°.<br>Karena △PQR ~ △STU, sudut seletak sama besar, maka **∠U = ∠R = 60°**."
+            },
+
+            // Q29 (C)
+            {
+                id: 29,
+                category: "Kesebangunan",
+                question: "Dua buah persegi panjang A dan B diketahui sebangun. Jika sudut salah satu pojok pada persegi panjang A adalah 90°, maka sudut yang seletak pada persegi panjang B besarnya...",
+                svg: `<svg width="260" height="130" viewBox="0 0 260 130">
+                    <!-- Rect A -->
+                    <rect x="20" y="40" width="80" height="50" fill="#f1f5f9" stroke="#334155" stroke-width="2" rx="2"/>
+                    <rect x="20" y="78" width="12" height="12" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+                    <text x="60" y="70" font-size="11" font-weight="bold" fill="#334155" text-anchor="middle">A</text>
+
+                    <!-- Rect B -->
+                    <rect x="130" y="25" width="110" height="70" fill="#e0e7ff" stroke="#4338ca" stroke-width="2" rx="2"/>
+                    <rect x="130" y="83" width="12" height="12" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+                    <text x="185" y="65" font-size="11" font-weight="bold" fill="#4338ca" text-anchor="middle">B</text>
+                </svg>`,
+                options: ["45°", "60°", "90°", "180°"],
+                correct: 2, // C
+                explanation: "Semua persegi panjang memiliki sudut siku-siku (90°). Bangun yang sebangun memiliki sudut-sudut seletak yang **persis sama besar (90°)**."
+            },
+
+            // Q30 (D)
+            {
+                id: 30,
+                category: "Kesebangunan",
+                question: "Sebuah tiang tinggi 2 m memiliki bayangan 3 m. Pada saat bersamaan, sebuah pohon memiliki bayangan 12 m. Berapakah besar sudut elevasi sinar matahari yang membentuk bayangan tiang dan pohon tersebut?",
+                svg: `<svg width="280" height="150" viewBox="0 0 280 150">
+                    <!-- Ground -->
+                    <line x1="10" y1="120" x2="270" y2="120" stroke="#334155" stroke-width="2.5"/>
+                    
+                    <!-- Pole Triangle -->
+                    <polygon points="30,120 30,80 90,120" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+                    <text x="20" y="100" font-size="9" font-weight="bold" fill="#d97706">2m</text>
+                    <text x="50" y="132" font-size="9" font-weight="bold" fill="#d97706">3m</text>
+
+                    <!-- Tree Triangle -->
+                    <polygon points="130,120 130,30 250,120" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+                    <text x="180" y="132" font-size="9" font-weight="bold" fill="#16a34a">12m</text>
+
+                    <!-- Sun rays parallel lines -->
+                    <line x1="20" y1="73" x2="95" y2="123" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,2"/>
+                    <line x1="120" y1="23" x2="255" y2="123" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,2"/>
+                    
+                    <text x="210" y="112" font-size="10" font-weight="bold" fill="#b91c1c">α</text>
+                    <text x="75" y="112" font-size="10" font-weight="bold" fill="#b91c1c">α</text>
+                </svg>`,
+                options: [
+                    "Pohon memiliki sudut elevasi lebih besar karena lebih tinggi",
+                    "Tiang memiliki sudut elevasi lebih besar karena lebih pendek",
+                    "Tergantung pada berat tiang dan pohon",
+                    "Sama besar karena sinar matahari datang secara sejajar (sebangun)"
+                ],
+                correct: 3, // D
+                explanation: "Karena sinar matahari datang dari jarak sangat jauh, berkas sinarnya dianggap sejajar. Segitiga tiang dan pohon **sebangun**, sehingga sudut elevasi sinarnya **SAMA BESAR**."
+            }
+        ];
+
+        const LOCAL_STORAGE_KEY = "math_quiz_sudut_kesebangunan_state_v2";
+
+        let state = {
+            currentIndex: 0,
+            answers: {}, // { questionIndex: selectedOptionIndex }
+            flagged: []  // [ questionIndex ]
+        };
+
+        // Load saved progress from localStorage
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    state = { ...state, ...parsed };
+                }
+            } catch (e) {
+                console.error("Gagal memuat state dari LocalStorage", e);
+            }
+        }
+
+        // Save progress to localStorage
+        function saveState() {
+            try {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                console.error("Gagal menyimpan ke LocalStorage", e);
+            }
+        }
+
+        function renderGrid() {
+            const gridEl = document.getElementById("question-grid");
+            gridEl.innerHTML = "";
+
+            let answeredCount = 0;
+            let flaggedCount = 0;
+
+            questionsData.forEach((q, idx) => {
+                const isCurrent = idx === state.currentIndex;
+                const isAnswered = state.answers.hasOwnProperty(idx);
+                const isFlagged = state.flagged.includes(idx);
+
+                if (isAnswered) answeredCount++;
+                if (isFlagged) flaggedCount++;
+
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.onclick = () => jumpToQuestion(idx);
+                
+                // Base styling
+                let btnClasses = "w-full aspect-square rounded-xl text-xs font-bold transition flex items-center justify-center relative border shadow-sm ";
+
+                if (isCurrent) {
+                    btnClasses += "bg-indigo-600 text-white border-indigo-700 ring-2 ring-indigo-300 ring-offset-1 ";
+                } else if (isAnswered) {
+                    btnClasses += "bg-emerald-500 text-white border-emerald-600 hover:bg-emerald-600 ";
+                } else {
+                    btnClasses += "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 ";
+                }
+
+                btn.className = btnClasses;
+                btn.innerHTML = `<span>${idx + 1}</span>`;
+
+                // Flagged badge icon
+                if (isFlagged) {
+                    const flagBadge = document.createElement("span");
+                    flagBadge.className = "absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full border border-white";
+                    btn.appendChild(flagBadge);
+                }
+
+                gridEl.appendChild(btn);
+            });
+
+            // Update Statistics Counters
+            document.getElementById("stat-answered").innerText = answeredCount;
+            document.getElementById("stat-unanswered").innerText = questionsData.length - answeredCount;
+            document.getElementById("stat-flagged").innerText = flaggedCount;
+            document.getElementById("answered-badge").innerText = `${answeredCount} Terjawab`;
+            document.getElementById("header-progress-text").innerText = `${answeredCount} / ${questionsData.length} Soal`;
+
+            // Top progress line
+            const progressPercent = (answeredCount / questionsData.length) * 100;
+            document.getElementById("top-progress-bar").style.width = `${progressPercent}%`;
+        }
+
+        function renderQuestion() {
+            const q = questionsData[state.currentIndex];
+
+            // Set Header Tags
+            document.getElementById("question-num-tag").innerText = `Soal #${state.currentIndex + 1} dari ${questionsData.length}`;
+            document.getElementById("question-category-tag").innerText = q.category;
+
+            // Set Diagram SVG
+            document.getElementById("illustration-container").innerHTML = q.svg;
+
+            // Set Question Text
+            document.getElementById("question-text").innerText = q.question;
+
+            // Bookmark / Flag state
+            const isFlagged = state.flagged.includes(state.currentIndex);
+            const flagBtn = document.getElementById("flag-btn");
+            const flagIcon = document.getElementById("flag-icon");
+            const flagText = document.getElementById("flag-text");
+
+            if (isFlagged) {
+                flagBtn.className = "text-xs flex items-center gap-1.5 px-3 py-1 rounded-lg border border-amber-300 bg-amber-50 text-amber-800 font-semibold transition";
+                flagIcon.setAttribute("class", "w-4 h-4 text-amber-500 fill-amber-400");
+                flagText.innerText = "Ditandai Ragu";
+            } else {
+                flagBtn.className = "text-xs flex items-center gap-1.5 px-3 py-1 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition";
+                flagIcon.setAttribute("class", "w-4 h-4 text-slate-400");
+                flagText.innerText = "Tandai Ragu";
+            }
+
+            // Render Options
+            const optionsContainer = document.getElementById("options-container");
+            optionsContainer.innerHTML = "";
+
+            const hasAnswered = state.answers.hasOwnProperty(state.currentIndex);
+            const selectedOpt = state.answers[state.currentIndex];
+
+            const optionPrefixes = ["A", "B", "C", "D"];
+
+            q.options.forEach((optText, optIdx) => {
+                const isSelected = selectedOpt === optIdx;
+                const isCorrectOpt = optIdx === q.correct;
+
+                const optBtn = document.createElement("button");
+                optBtn.type = "button";
+                optBtn.onclick = () => selectOption(optIdx);
+
+                let btnStyle = "w-full text-left p-3.5 rounded-xl border text-xs sm:text-sm font-medium transition flex items-start gap-3 relative ";
+
+                if (hasAnswered) {
+                    if (isCorrectOpt) {
+                        btnStyle += "bg-emerald-50 border-emerald-300 text-emerald-900 font-semibold ring-1 ring-emerald-400 ";
+                    } else if (isSelected && !isCorrectOpt) {
+                        btnStyle += "bg-rose-50 border-rose-300 text-rose-900 font-semibold ring-1 ring-rose-400 ";
+                    } else {
+                        btnStyle += "bg-slate-50/50 border-slate-200 text-slate-400 opacity-60 ";
+                    }
+                } else {
+                    btnStyle += "bg-white border-slate-200 text-slate-700 hover:border-indigo-400 hover:bg-indigo-50/40 ";
+                }
+
+                optBtn.className = btnStyle;
+
+                // Option badge (A, B, C, D)
+                let badgeStyle = "w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 ";
+                if (hasAnswered) {
+                    if (isCorrectOpt) badgeStyle += "bg-emerald-600 text-white";
+                    else if (isSelected && !isCorrectOpt) badgeStyle += "bg-rose-600 text-white";
+                    else badgeStyle += "bg-slate-200 text-slate-500";
+                } else {
+                    badgeStyle += "bg-slate-100 text-slate-600 border border-slate-200";
+                }
+
+                optBtn.innerHTML = `
+                    <span class="${badgeStyle}">${optionPrefixes[optIdx]}</span>
+                    <span class="flex-1 leading-relaxed pt-0.5">${optText}</span>
+                `;
+
+                optionsContainer.appendChild(optBtn);
+            });
+
+            const feedbackBox = document.getElementById("feedback-box");
+            if (hasAnswered) {
+                const isUserCorrect = selectedOpt === q.correct;
+                feedbackBox.classList.remove("hidden", "bg-emerald-50", "border-emerald-200", "text-emerald-900", "bg-rose-50", "border-rose-200", "text-rose-900");
+
+                if (isUserCorrect) {
+                    feedbackBox.classList.add("bg-emerald-50", "border-emerald-200", "text-emerald-900");
+                    feedbackBox.innerHTML = `
+                        <div class="flex items-center gap-2 font-bold text-emerald-700 text-sm">
+                            <span>🎉 Jawaban Kamu Benar!</span>
+                        </div>
+                        <div class="mt-1 text-xs leading-relaxed text-emerald-800">
+                            <b>Pembahasan:</b> ${q.explanation}
+                        </div>
+                    `;
+                } else {
+                    feedbackBox.classList.add("bg-rose-50", "border-rose-200", "text-rose-900");
+                    feedbackBox.innerHTML = `
+                        <div class="flex items-center gap-2 font-bold text-rose-700 text-sm">
+                            <span>❌ Jawaban Kurang Tepat!</span>
+                        </div>
+                        <div class="mt-1 text-xs leading-relaxed text-rose-800">
+                            Jawaban yang benar adalah opsi <b>${optionPrefixes[q.correct]} (${q.options[q.correct]})</b>.<br>
+                            <b>Pembahasan:</b> ${q.explanation}
+                        </div>
+                    `;
+                }
+            } else {
+                feedbackBox.classList.add("hidden");
+            }
+
+            // Update Navigation Prev/Next button states
+            document.getElementById("prev-btn").disabled = state.currentIndex === 0;
+            const nextBtn = document.getElementById("next-btn");
+            if (state.currentIndex === questionsData.length - 1) {
+                nextBtn.innerHTML = `<span>Selesai</span>`;
+            } else {
+                nextBtn.innerHTML = `<span>Selanjutnya</span> <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;
+            }
+
+            renderGrid();
+        }
+
+        function selectOption(optIndex) {
+            state.answers[state.currentIndex] = optIndex;
+            saveState();
+            renderQuestion();
+        }
+
+        function jumpToQuestion(index) {
+            if (index >= 0 && index < questionsData.length) {
+                state.currentIndex = index;
+                saveState();
+                renderQuestion();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function navigateQuestion(step) {
+            const targetIdx = state.currentIndex + step;
+            if (targetIdx >= 0 && targetIdx < questionsData.length) {
+                jumpToQuestion(targetIdx);
+            } else if (targetIdx === questionsData.length) {
+                showScoreSummary();
+            }
+        }
+
+        function toggleFlagCurrentQuestion() {
+            const idx = state.currentIndex;
+            const flagPos = state.flagged.indexOf(idx);
+            if (flagPos > -1) {
+                state.flagged.splice(flagPos, 1);
+            } else {
+                state.flagged.push(idx);
+            }
+            saveState();
+            renderQuestion();
+        }
+
+        function confirmResetQuiz() {
+            if (confirm("Apakah Anda yakin ingin menghapus semua jawaban dan mengulang quiz dari awal?")) {
+                state.answers = {};
+                state.flagged = [];
+                state.currentIndex = 0;
+                saveState();
+                closeScoreModal();
+                renderQuestion();
+            }
+        }
+
+        function showScoreSummary() {
+            let correctCount = 0;
+            let totalAnswered = 0;
+
+            questionsData.forEach((q, idx) => {
+                if (state.answers.hasOwnProperty(idx)) {
+                    totalAnswered++;
+                    if (state.answers[idx] === q.correct) {
+                        correctCount++;
+                    }
+                }
+            });
+
+            const incorrectCount = totalAnswered - correctCount;
+            const unansweredCount = questionsData.length - totalAnswered;
+            const finalScore = Math.round((correctCount / questionsData.length) * 100);
+
+            document.getElementById("final-score-val").innerText = finalScore;
+            document.getElementById("modal-correct-count").innerText = `${correctCount} Soal`;
+            document.getElementById("modal-incorrect-count").innerText = `${incorrectCount} Soal`;
+            document.getElementById("modal-unanswered-count").innerText = `${unansweredCount} Soal`;
+
+            let msg = "";
+            if (finalScore === 100) {
+                msg = "🌟 <b>Sempurna!</b> Anda telah menguasai seluruh konsep hubungan antar sudut dan kesebangunan dengan sempurna!";
+            } else if (finalScore >= 80) {
+                msg = "👏 <b>Sangat Bagus!</b> Pemahaman materi geometri Anda sudah sangat kuat. Pertahankan!";
+            } else if (finalScore >= 60) {
+                msg = "👍 <b>Cukup Baik!</b> Pelajari kembali pembahasan soal-soal yang masih keliru untuk menyempurnakan pemahaman.";
+            } else {
+                msg = "💪 <b>Jangan Berkecil Hati!</b> Ulangi quiz dan pelajari setiap pembahasan gambar untuk memahami sifat-sifat sudut dan kesebangunan.";
+            }
+
+            document.getElementById("final-feedback-msg").innerHTML = msg;
+            document.getElementById("score-modal").classList.remove("hidden");
+        }
+
+        function closeScoreModal() {
+            document.getElementById("score-modal").classList.add("hidden");
+        }
+
+        // Initialize App on Window Load
+        window.onload = function() {
+            loadState();
+            renderQuestion();
+        };
+    </script>
+</body>
+</html>
